@@ -1,10 +1,10 @@
-@import "tailwindcss" source(none);
-@source "../src";
+@import "tailwindcss" ;
+/* @source "../src"; */
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap'); */
 
 @theme inline {
   --font-display: 'Fraunces', Georgia, serif;
@@ -119,14 +119,7 @@
   --ring: oklch(0.78 0.13 85);
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
 
-tr {
-  border-bottom: 1px solid #ddd;
-}
 @layer base {
   * { border-color: var(--color-border); }
   body {
