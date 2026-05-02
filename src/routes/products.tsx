@@ -71,7 +71,7 @@ function Products() {
                   <Label>GST rate</Label>
                   <Select value={String(form.gst_rate)} onValueChange={(v) => setForm({ ...form, gst_rate: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{[0, 5, 12, 18, 28].map((r) => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent>
+                    <SelectContent>{[0, 5,9, 12, 18, 28].map((r) => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>

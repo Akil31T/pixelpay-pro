@@ -29,3 +29,5 @@ export const formatDate = (d: string | Date) => {
   const date = typeof d === "string" ? new Date(d) : d;
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 };
+
+export const formatPercent = (value: number) => `${value}%`;

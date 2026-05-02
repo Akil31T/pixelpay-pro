@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { inr, formatDate, numberToWordsINR } from "@/lib/format";
+import { inr, formatDate, numberToWordsINR, formatPercent } from "@/lib/format";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/invoices/$id")({
@@ -46,6 +46,19 @@ function InvoiceDetail() {
     partial: "bg-chart-3/15 text-chart-3 border-chart-3/30",
   } as Record<string, string>)[inv.status] || "bg-muted text-muted-foreground border-border";
 
+  const totalAmount = items.reduce(
+    (sum, item) =>
+      sum + Number(item.quantity || 0) * Number(item.unit_price || 0),
+    0
+  );
+  const totalQty = items.reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0
+  );
+
+  const cgst = totalAmount * 0.09;
+const sgst = totalAmount * 0.09;
+const grandTotal = totalAmount + cgst + sgst;
   return (
     <div className="p-6 md:p-10 max-w-5xl mx-auto">
       {/* Toolbar - hidden in print */}
@@ -63,131 +76,264 @@ function InvoiceDetail() {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={() => window.print()}><Printer className="h-4 w-4" /> Print</Button>
-          <Button onClick={() => window.print()} className="bg-primary hover:bg-primary-glow"><Download className="h-4 w-4" /> Save as PDF</Button>
+          <Button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-600-glow"><Download className="h-4 w-4" /> Save as PDF</Button>
         </div>
       </div>
+      {/* Invoice Paper */}
+      <div className="bg-white text-black border-1 border-black  rounded-none p-6 print:p-4 print: text-[13px] leading-tight">
 
-      {/* Invoice paper */}
-      <div className="bg-white border border-border rounded-xl shadow-card p-8 md:p-12 print:shadow-none print:border-0 print:rounded-none print:p-0" style={{ color: "oklch(0.18 0.04 165)" }}>
-        {/* Header */}
-        <div className="flex items-start justify-between mb-10 pb-6 border-b-2" style={{ borderColor: "oklch(0.30 0.08 165)" }}>
-          <div>
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: "var(--gradient-emerald)" }}>
-                <Sparkles className="h-4 w-4" style={{ color: "var(--gold)" }} />
-              </div>
-              <div>
-                <div className="font-display text-xl font-semibold">{profile?.company_name || "Your Company"}</div>
-                {profile?.gstin && <div className="text-xs text-muted-foreground">GSTIN: {profile.gstin}</div>}
-              </div>
-            </div>
-            <div className="text-xs text-muted-foreground space-y-0.5 max-w-xs">
-              {profile?.address && <div>{profile.address}</div>}
-              {(profile?.city || profile?.state) && <div>{[profile.city, profile.state, profile.pincode].filter(Boolean).join(", ")}</div>}
-              {profile?.phone && <div>{profile.phone}</div>}
-              {profile?.email && <div>{profile.email}</div>}
-            </div>
+        {/* Heading */}
+        {/* <div className="text-center pb-2 mb-2">
+          <h1 className="text-2xl font-bold">Tax Invoice</h1>
+          <p className="text-xs">(ORIGINAL FOR RECIPIENT)</p>
+        </div> */}
+
+        {/* Top section */}
+        <div className="grid grid-cols-2 border-black border-1 ">
+          {/* Seller */}
+          <div className="border-r-1 border-black  p-3">
+            <h2 className="font-bold text-lg uppercase">
+              {profile?.company_name || "Your Company"}
+            </h2>
+
+            <p>{profile?.address}</p>
+            <p>
+              {[profile?.city, profile?.state, profile?.pincode]
+                .filter(Boolean)
+                .join(", ")}
+            </p>
+
+            {profile?.gstin && (
+              <p>
+                <b>GST:</b> {profile.gstin}
+              </p>
+            )}
+            {/* <p><b>Bank:</b> {profile.bank_name}</p>
+            <p><b>A/C No:</b> {profile.bank_account}</p>
+            <p><b>IFSC:</b> {profile.bank_ifsc}</p>
+            <p><b>PAN No:</b> {profile.pan_no} BRWPJ3042D</p> */}
           </div>
-          <div className="text-right">
-            <div className="font-display text-3xl font-semibold mb-1" style={{ color: "oklch(0.30 0.08 165)" }}>TAX INVOICE</div>
-            <div className="text-sm font-mono mt-2">{inv.invoice_number}</div>
-            <Badge variant="outline" className={`mt-2 ${badgeCls}`}>{inv.status.toUpperCase()}</Badge>
+
+          {/* Invoice info */}
+          <div>
+            <div className="grid grid-cols-2 border-black border-b ">
+              <div className="p-2 border-black  border-r ">
+                <b>Invoice No.</b>
+                <p>{inv.invoice_number}</p>
+              </div>
+
+              <div className="p-2">
+                <b>Dated</b>
+                <p>{formatDate(inv.invoice_date)}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 border-black  border-b ">
+              <div className="p-2 border-black border-r ">
+                <b>Status</b>
+                <p>{inv.status}</p>
+              </div>
+
+              <div className="p-2">
+                <b>Tax Type</b>
+                <p>{inv.is_interstate ? "IGST" : "CGST + SGST"}</p>
+              </div>
+            </div>
+
+            <div className="p-2">
+              <b>Vehicle No.</b>
+              <p>TN67 AC 4856</p>
+            </div>
           </div>
         </div>
 
-        {/* Bill to + dates */}
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
-          <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 font-semibold">Bill to</div>
-            <div className="font-display text-lg font-semibold">{cust.name || "—"}</div>
-            {cust.gstin && <div className="text-xs text-muted-foreground mt-1">GSTIN: {cust.gstin}</div>}
-            {cust.billing_address && <div className="text-sm mt-2 leading-relaxed">{cust.billing_address}</div>}
-            {(cust.city || cust.state) && <div className="text-sm">{[cust.city, cust.state, cust.pincode].filter(Boolean).join(", ")}</div>}
-            {cust.phone && <div className="text-sm mt-1">{cust.phone}</div>}
-          </div>
-          <div className="md:text-right space-y-2 text-sm">
-            <div><span className="text-muted-foreground text-xs uppercase tracking-wider mr-2">Invoice date</span><span className="font-medium">{formatDate(inv.invoice_date)}</span></div>
-            {inv.due_date && <div><span className="text-muted-foreground text-xs uppercase tracking-wider mr-2">Due date</span><span className="font-medium">{formatDate(inv.due_date)}</span></div>}
-            <div><span className="text-muted-foreground text-xs uppercase tracking-wider mr-2">Tax type</span><span className="font-medium">{inv.is_interstate ? "IGST (Inter-state)" : "CGST + SGST"}</span></div>
-          </div>
+        {/* Buyer */}
+        <div className="border-x-1 border-b-1 border-black  p-3">
+          <h3 className="font-bold mb-1">Buyer (Bill to)</h3>
+
+          <p className="font-semibold text-base">{cust.name}</p>
+
+          {cust.billing_address && <p>{cust.billing_address}</p>}
+
+          <p>
+            {[cust.city, cust.state, cust.pincode]
+              .filter(Boolean)
+              .join(", ")}
+          </p>
+
+          {cust.gstin && (
+            <p>
+              <b>GSTIN/UIN:</b> {cust.gstin}
+            </p>
+          )}
         </div>
 
         {/* Items */}
-        <table className="w-full text-sm mb-8">
-          <thead>
-            <tr className="text-[10px] uppercase tracking-wider" style={{ background: "oklch(0.30 0.08 165)", color: "oklch(0.98 0 0)" }}>
-              <th className="text-left px-3 py-2.5 font-semibold">#</th>
-              <th className="text-left px-3 py-2.5 font-semibold">Description</th>
-              <th className="text-center px-3 py-2.5 font-semibold">HSN</th>
-              <th className="text-right px-3 py-2.5 font-semibold">Qty</th>
-              <th className="text-right px-3 py-2.5 font-semibold">Rate</th>
-              <th className="text-right px-3 py-2.5 font-semibold">Disc%</th>
-              <th className="text-right px-3 py-2.5 font-semibold">Taxable</th>
-              <th className="text-right px-3 py-2.5 font-semibold">GST%</th>
-              <th className="text-right px-3 py-2.5 font-semibold">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((it, i) => (
-              <tr key={it.id} className="border-b" style={{ borderColor: "oklch(0.92 0.015 130)" }}>
-                <td className="px-3 py-3 text-muted-foreground">{i + 1}</td>
-                <td className="px-3 py-3"><div className="font-medium">{it.name}</div>{it.description && <div className="text-xs text-muted-foreground">{it.description}</div>}</td>
-                <td className="px-3 py-3 text-center text-xs text-muted-foreground">{it.hsn_code || "—"}</td>
-                <td className="px-3 py-3 text-right">{it.quantity} {it.unit}</td>
-                <td className="px-3 py-3 text-right">{inr(Number(it.unit_price))}</td>
-                <td className="px-3 py-3 text-right text-muted-foreground">{Number(it.discount_pct)}%</td>
-                <td className="px-3 py-3 text-right">{inr(Number(it.taxable))}</td>
-                <td className="px-3 py-3 text-right text-muted-foreground">{Number(it.gst_rate)}%</td>
-                <td className="px-3 py-3 text-right font-semibold">{inr(Number(it.total))}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+<table className="mt-2 w-full border border-gray-400 border-collapse h-[400px] text-[12px]">
 
-        {/* Totals */}
-        <div className="flex flex-col md:flex-row justify-between gap-8 mb-8">
-          <div className="flex-1 max-w-sm">
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 font-semibold">Amount in words</div>
-            <p className="text-sm italic font-display">{numberToWordsINR(Number(inv.total))}</p>
-          </div>
-          <div className="md:w-80 space-y-1.5 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{inr(Number(inv.subtotal))}</span></div>
-            {Number(inv.discount) > 0 && <div className="flex justify-between"><span className="text-muted-foreground">Discount</span><span>− {inr(Number(inv.discount))}</span></div>}
-            {inv.is_interstate ? (
-              <div className="flex justify-between"><span className="text-muted-foreground">IGST</span><span>{inr(Number(inv.igst))}</span></div>
-            ) : (
+  {/* HEADER */}
+  <thead>
+    <tr className="bg-blue-600 text-white">
+      <th className="border border-gray-400 p-2 w-[5%]">Sl No.</th>
+      <th className="border border-gray-400 p-2 text-left w-[35%]">
+        Description of Goods
+      </th>
+      <th className="border border-gray-400 p-2 w-[10%]">HSN/SAC</th>
+      <th className="border border-gray-400 p-2 w-[10%]">Qty</th>
+      <th className="border border-gray-400 p-2 w-[15%]">Rate</th>
+      <th className="border border-gray-400 p-2 w-[15%]">Amount</th>
+    </tr>
+  </thead>
+
+  {/* BODY */}
+  <tbody>
+    {items.map((it, i) => (
+      <tr key={it.id}>
+        <td className="border border-gray-400 p-2 text-center align-top">
+          {i + 1}
+        </td>
+
+        <td className="border border-gray-400 p-2 align-top">
+          <div className="font-medium">{it.name}</div>
+          {it.description && (
+            <div className="text-xs text-gray-600">{it.description}</div>
+          )}
+        </td>
+
+        <td className="border border-gray-400 p-2 text-center">
+          {it.hsn_code}
+        </td>
+
+        <td className="border border-gray-400 p-2 text-right">
+          {it.quantity} {it.unit}
+        </td>
+
+        <td className="border border-gray-400 p-2 text-right">
+          {Number(it.unit_price).toFixed(2)}
+        </td>
+
+        <td className="border border-gray-400 p-2 text-right font-semibold">
+          {(Number(it.quantity) * Number(it.unit_price)).toFixed(2)}
+        </td>
+      </tr>
+    ))}
+
+    {/* EMPTY SPACE LIKE PAPER */}
+    <tr className="h-[120px]">
+      <td className="border border-gray-400"></td>
+      <td className="border border-gray-400"></td>
+      <td className="border border-gray-400"></td>
+      <td className="border border-gray-400"></td>
+      <td className="border border-gray-400"></td>
+      <td className="border border-gray-400"></td>
+    </tr>
+
+    {/* TOTAL ROW */}
+    <tr>
+      <td className="border border-gray-400"></td>
+
+      <td className="border border-gray-400 p-2 font-bold">
+        TOTAL
+      </td>
+
+      <td className="border border-gray-400"></td>
+
+      <td className="border border-gray-400"></td>
+
+      <td className="border border-gray-400"></td>
+
+      <td className="border border-gray-400 p-2 text-right font-bold">
+        {inr(totalAmount)}
+      </td>
+    </tr>
+
+    {/* CGST */}
+    <tr>
+      <td className="border border-gray-400"></td>
+
+      <td colSpan={4} className="border border-gray-400 p-2 text-right italic">
+        CGST @9%
+      </td>
+
+      <td className="border border-gray-400 p-2 text-right">
+        {inr(cgst)}
+      </td>
+    </tr>
+
+    {/* SGST */}
+    <tr>
+      <td className="border border-gray-400"></td>
+
+      <td colSpan={4} className="border border-gray-400 p-2 text-right italic">
+        SGST @9%
+      </td>
+
+      <td className="border border-gray-400 p-2 text-right">
+        {inr(sgst)}
+      </td>
+    </tr>
+
+    {/* GRAND TOTAL */}
+    <tr>
+      <td className="border border-gray-400"></td>
+
+      <td colSpan={4} className="border border-gray-400 p-2 text-right font-bold">
+        GRAND TOTAL
+      </td>
+
+      <td className="border border-gray-400 p-2 text-right font-bold">
+        {inr(grandTotal)}
+      </td>
+    </tr>
+
+  </tbody>
+</table>
+
+
+        {/* Taxable value in words */}
+        <div className="border-x-1 border-b border-black  p-3">
+          <b>Total Amount (in words):</b>
+          <p className="mt-1 font-semibold">
+            {numberToWordsINR(Number(grandTotal))}
+          </p>
+        </div>
+        {/* Footer */}
+        <div className="grid grid-cols-2 border-x-1 border-black  border-b-1 ">
+          <div className="border-r border-black  p-3">
+            <h3 className="font-bold mb-2">Declaration</h3>
+            <p className="text-xs">
+              We declare that this invoice shows the actual price of the goods
+              described and that all particulars are true and correct.
+            </p>
+
+            {profile?.bank_name && (
               <>
-                <div className="flex justify-between"><span className="text-muted-foreground">CGST</span><span>{inr(Number(inv.cgst))}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">SGST</span><span>{inr(Number(inv.sgst))}</span></div>
+                <h3 className="font-bold mt-4 mb-2">Bank Details</h3>
+                <p>A/C Name: {profile.company_name}</p>
+                <p>Bank: {profile.bank_name}</p>
+                <p>A/C No: {profile.bank_account}</p>
+                <p>IFSC: {profile.bank_ifsc}</p>
+                <p>PAN No: {profile.pan_no}BRWPJ3042D</p>
               </>
             )}
-            {Number(inv.shipping) > 0 && <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{inr(Number(inv.shipping))}</span></div>}
-            {Number(inv.additional_charge) > 0 && <div className="flex justify-between"><span className="text-muted-foreground">Other</span><span>{inr(Number(inv.additional_charge))}</span></div>}
-            <div className="flex justify-between items-baseline border-t-2 pt-3 mt-3" style={{ borderColor: "oklch(0.30 0.08 165)" }}>
-              <span className="font-display text-base font-semibold">Grand total</span>
-              <span className="font-display text-2xl font-semibold" style={{ color: "oklch(0.30 0.08 165)" }}>{inr(Number(inv.total))}</span>
-            </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="grid md:grid-cols-2 gap-8 pt-6 border-t border-border">
-          <div className="space-y-4">
-            {inv.notes && <div><div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-semibold">Notes</div><p className="text-sm">{inv.notes}</p></div>}
-            {inv.terms && <div><div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-semibold">Terms</div><p className="text-xs text-muted-foreground leading-relaxed">{inv.terms}</p></div>}
-            {profile?.bank_name && (
-              <div><div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-semibold">Bank details</div>
-                <p className="text-xs">{profile.bank_name}{profile.bank_account ? ` · A/C ${profile.bank_account}` : ""}{profile.bank_ifsc ? ` · IFSC ${profile.bank_ifsc}` : ""}</p></div>
-            )}
-          </div>
-          <div className="text-right flex flex-col justify-end">
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-12 font-semibold">For {profile?.company_name || "your company"}</div>
-            <div className="border-t pt-2 inline-block ml-auto" style={{ borderColor: "oklch(0.30 0.08 165)", minWidth: 180 }}>
-              <div className="text-xs">Authorised signatory</div>
+          <div className="p-3 flex flex-col justify-end items-end min-h-[180px]">
+            <p className="font-semibold mb-20">
+              for {profile?.company_name}
+            </p>
+
+            <div className="border-t  border-black pt-2 text-sm text-center w-52">
+              Authorised Signatory
             </div>
           </div>
         </div>
+{/* 
+        <div className="text-center mt-3 text-xs">
+          This is a Computer Generated Invoice
+        </div> */}
       </div>
+
     </div>
   );
 }

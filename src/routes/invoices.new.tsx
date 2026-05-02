@@ -209,31 +209,98 @@ function NewInvoice() {
             </div>
             <div className="space-y-3">
               {items.map((it, i) => (
-                <div key={i} className="border border-border rounded-lg p-4 bg-muted/20">
+                <div
+                  key={i}
+                  className="border border-border rounded-lg p-4 bg-muted/20"
+                >
                   <div className="grid md:grid-cols-12 gap-3">
+                    {/* Product */}
                     <div className="md:col-span-4 space-y-1.5">
-                      <Label className="text-xs">Product / service</Label>
-                      {products.length > 0 && (
-                        <Select onValueChange={(v) => pickProduct(i, v)}>
-                          <SelectTrigger className="h-8 text-xs mb-1"><SelectValue placeholder="Pick from catalog…" /></SelectTrigger>
-                          <SelectContent>{products.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
-                        </Select>
-                      )}
-                      <Input placeholder="Item name" value={it.name} onChange={(e) => updateItem(i, { name: e.target.value })} />
-                    </div>
-                    <div className="md:col-span-1 space-y-1.5"><Label className="text-xs">Qty</Label><Input type="number" min={0} value={it.quantity} onChange={(e) => updateItem(i, { quantity: Number(e.target.value) })} /></div>
-                    <div className="md:col-span-2 space-y-1.5"><Label className="text-xs">Unit price (₹)</Label><Input type="number" min={0} step="0.01" value={it.unit_price} onChange={(e) => updateItem(i, { unit_price: Number(e.target.value) })} /></div>
-                    <div className="md:col-span-1 space-y-1.5"><Label className="text-xs">Disc %</Label><Input type="number" min={0} max={100} value={it.discount_pct} onChange={(e) => updateItem(i, { discount_pct: Number(e.target.value) })} /></div>
-                    <div className="md:col-span-2 space-y-1.5">
-                      <Label className="text-xs">GST %</Label>
-                      <Select value={String(it.gst_rate)} onValueChange={(v) => updateItem(i, { gst_rate: Number(v) })}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>{[0, 5, 12, 18, 28].map((r) => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent>
+                      <Label className="text-xs">Product / Service</Label>
+
+                      <Select onValueChange={(v) => pickProduct(i, v)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select product..." />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                          {products.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.name}
+                            </SelectItem>
+                          ))}
+
+                          {/* <SelectItem value="custom">Custom Item</SelectItem> */}
+                        </SelectContent>
                       </Select>
+
+                      {/* Only show manual input when custom */}
+
                     </div>
-                    <div className="md:col-span-1 space-y-1.5"><Label className="text-xs">Total</Label><div className="h-9 flex items-center text-sm font-semibold">{inr(calc.lines[i]?.total || 0)}</div></div>
+
+                    {/* Qty */}
+                    <div className="md:col-span-2 space-y-1.5">
+                      <Label className="text-xs">Qty</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={it.quantity}
+                        onChange={(e) =>
+                          updateItem(i, { quantity: Number(e.target.value) })
+                        }
+                      />
+                    </div>
+
+                    {/* Price */}
+                    <div className="md:col-span-2 space-y-1.5">
+                      <Label className="text-xs">Unit Price (₹)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={it.unit_price}
+                        onChange={(e) =>
+                          updateItem(i, {
+                            unit_price: Number(e.target.value),
+                          })
+                        }
+                      />
+                    </div>
+
+                    {/* Discount */}
+                    <div className="md:col-span-1 space-y-1.5">
+                      <Label className="text-xs">Disc %</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={it.discount_pct}
+                        onChange={(e) =>
+                          updateItem(i, {
+                            discount_pct: Number(e.target.value),
+                          })
+                        }
+                      />
+                    </div>
+
+                    {/* Total */}
+                    <div className="md:col-span-2 space-y-1.5">
+                      <Label className="text-xs">Total</Label>
+                      <div className="h-10 flex items-center font-semibold text-sm">
+                        {inr(calc.lines[i]?.total || 0)}
+                      </div>
+                    </div>
+
+                    {/* Delete */}
                     <div className="md:col-span-1 flex items-end justify-end">
-                      <Button size="icon" variant="ghost" onClick={() => setItems(items.filter((_, x) => x !== i))} disabled={items.length === 1}>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() =>
+                          setItems(items.filter((_, x) => x !== i))
+                        }
+                        disabled={items.length === 1}
+                      >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>

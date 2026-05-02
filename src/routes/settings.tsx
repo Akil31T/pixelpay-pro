@@ -74,6 +74,8 @@ function Settings() {
             <Field k="bank_name" label="Bank name" />
             <Field k="bank_account" label="Account number" />
             <Field k="bank_ifsc" label="IFSC code" />
+            <Field k="pan_no" label="PAN Number" />
+
           </div>
         </section>
       </div>

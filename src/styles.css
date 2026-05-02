@@ -119,6 +119,14 @@
   --ring: oklch(0.78 0.13 85);
 }
 
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+tr {
+  border-bottom: 1px solid #ddd;
+}
 @layer base {
   * { border-color: var(--color-border); }
   body {
