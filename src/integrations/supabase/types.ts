@@ -261,7 +261,6 @@ export type Database = {
           address: string | null
           bank_account: string | null
           bank_ifsc: string | null
-          pan_no:string|null
           bank_name: string | null
           city: string | null
           company_name: string | null
@@ -281,7 +280,6 @@ export type Database = {
           address?: string | null
           bank_account?: string | null
           bank_ifsc?: string | null
-          pan_no:string|null
           bank_name?: string | null
           city?: string | null
           company_name?: string | null
@@ -301,7 +299,6 @@ export type Database = {
           address?: string | null
           bank_account?: string | null
           bank_ifsc?: string | null
-          pan_no:string|null
           bank_name?: string | null
           city?: string | null
           company_name?: string | null
