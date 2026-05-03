@@ -9,7 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UsersRouteImport } from './routes/users'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CustomersRouteImport } from './routes/customers'
@@ -19,9 +21,19 @@ import { Route as InvoicesIndexRouteImport } from './routes/invoices.index'
 import { Route as InvoicesNewRouteImport } from './routes/invoices.new'
 import { Route as InvoicesIdRouteImport } from './routes/invoices.$id'
 
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsRoute = ProductsRouteImport.update({
@@ -71,7 +83,9 @@ export interface FileRoutesByFullPath {
   '/customers': typeof CustomersRoute
   '/dashboard': typeof DashboardRoute
   '/products': typeof ProductsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/users': typeof UsersRoute
   '/invoices/$id': typeof InvoicesIdRoute
   '/invoices/new': typeof InvoicesNewRoute
   '/invoices/': typeof InvoicesIndexRoute
@@ -82,7 +96,9 @@ export interface FileRoutesByTo {
   '/customers': typeof CustomersRoute
   '/dashboard': typeof DashboardRoute
   '/products': typeof ProductsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/users': typeof UsersRoute
   '/invoices/$id': typeof InvoicesIdRoute
   '/invoices/new': typeof InvoicesNewRoute
   '/invoices': typeof InvoicesIndexRoute
@@ -94,7 +110,9 @@ export interface FileRoutesById {
   '/customers': typeof CustomersRoute
   '/dashboard': typeof DashboardRoute
   '/products': typeof ProductsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/users': typeof UsersRoute
   '/invoices/$id': typeof InvoicesIdRoute
   '/invoices/new': typeof InvoicesNewRoute
   '/invoices/': typeof InvoicesIndexRoute
@@ -107,7 +125,9 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/products'
+    | '/reset-password'
     | '/settings'
+    | '/users'
     | '/invoices/$id'
     | '/invoices/new'
     | '/invoices/'
@@ -118,7 +138,9 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/products'
+    | '/reset-password'
     | '/settings'
+    | '/users'
     | '/invoices/$id'
     | '/invoices/new'
     | '/invoices'
@@ -129,7 +151,9 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/products'
+    | '/reset-password'
     | '/settings'
+    | '/users'
     | '/invoices/$id'
     | '/invoices/new'
     | '/invoices/'
@@ -141,7 +165,9 @@ export interface RootRouteChildren {
   CustomersRoute: typeof CustomersRoute
   DashboardRoute: typeof DashboardRoute
   ProductsRoute: typeof ProductsRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
+  UsersRoute: typeof UsersRoute
   InvoicesIdRoute: typeof InvoicesIdRoute
   InvoicesNewRoute: typeof InvoicesNewRoute
   InvoicesIndexRoute: typeof InvoicesIndexRoute
@@ -149,11 +175,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products': {
@@ -221,7 +261,9 @@ const rootRouteChildren: RootRouteChildren = {
   CustomersRoute: CustomersRoute,
   DashboardRoute: DashboardRoute,
   ProductsRoute: ProductsRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
+  UsersRoute: UsersRoute,
   InvoicesIdRoute: InvoicesIdRoute,
   InvoicesNewRoute: InvoicesNewRoute,
   InvoicesIndexRoute: InvoicesIndexRoute,
@@ -229,12 +271,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
