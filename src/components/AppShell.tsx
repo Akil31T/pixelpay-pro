@@ -1,10 +1,12 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, FileText, Users, Package, Settings, LogOut, Plus, Sparkles } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Package, Settings, LogOut, Plus, Sparkles, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-const items = [
+const baseItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/invoices", label: "Invoices", icon: FileText },
   { to: "/customers", label: "Customers", icon: Users },
@@ -15,7 +17,12 @@ const items = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const { user, signOut } = useAuth();
+  const { role } = useRole();
   const navigate = useNavigate();
+  const items = role === "super_admin"
+    ? [...baseItems, { to: "/users", label: "Users", icon: ShieldCheck }]
+    : baseItems;
+  const roleLabel = role === "super_admin" ? "Super Admin" : role === "admin" ? "Admin" : role === "staff" ? "Staff" : "";
 
   return (
     <div className="min-h-screen w-full flex bg-background">
@@ -63,7 +70,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-3 border-t border-sidebar-border">
-          <div className="px-3 py-2 text-xs text-sidebar-foreground/60 truncate">{user?.email}</div>
+          <div className="px-3 py-2 text-xs text-sidebar-foreground/60 truncate flex items-center justify-between gap-2">
+            <span className="truncate">{user?.email}</span>
+            {roleLabel && <Badge variant="outline" className="border-sidebar-border text-[10px] uppercase tracking-wider">{roleLabel}</Badge>}
+          </div>
           <button
             onClick={async () => { await signOut(); navigate({ to: "/auth" }); }}
             className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
