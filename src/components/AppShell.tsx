@@ -72,7 +72,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="p-3 border-t border-sidebar-border">
           <div className="px-3 py-2 text-xs text-sidebar-foreground/60 truncate flex items-center justify-between gap-2">
             <span className="truncate">{user?.email}</span>
-            {roleLabel && <Badge variant="outline" className="border-sidebar-border text-[10px] uppercase tracking-wider">{roleLabel}</Badge>}
+            {roleLabel && <Badge variant="outline" className="border-sidebar-border text-white text-[10px] uppercase tracking-wider">{roleLabel}</Badge>}
           </div>
           <button
             onClick={async () => { await signOut(); navigate({ to: "/auth" }); }}

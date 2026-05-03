@@ -136,3 +136,26 @@
   .no-print { display: none !important; }
   body { background: white !important; }
 }
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* vertical lines only */
+.table th,
+.table td {
+  border-right: 1px solid #aaa;
+  padding: 8px;
+}
+
+/* remove last column line */
+.table th:last-child,
+.table td:last-child {
+  border-right: none;
+}
+
+/* optional: table outer border */
+.table {
+  border: 1px solid #aaa;
+}

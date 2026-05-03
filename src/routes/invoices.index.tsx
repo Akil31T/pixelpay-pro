@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, Search, FileText } from "lucide-react";
+import { Plus, Search, FileText, Trash2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,13 @@ function InvoicesList() {
     pending: "bg-warning/15 text-warning border-warning/40",
     partial: "bg-chart-3/15 text-chart-3 border-chart-3/30",
   } as Record<string, string>)[s] || "bg-muted text-muted-foreground border-border";
+  const load = () => supabase.from("products").select("*").order("name").then(({ data }) => setList(data || []));
 
+  // const del = async (id: string) => {
+  //   if (!confirm("Delete Invoice?")) return;
+  //   await supabase.from("invoices").delete().eq("id", id);
+  //   load();
+  // };
   return (
     <div className="p-6 md:p-10 max-w-[1400px] mx-auto">
       <PageHeader
@@ -85,6 +91,8 @@ function InvoicesList() {
                   <th className="text-left px-5 py-3 font-medium">Due</th>
                   <th className="text-right px-5 py-3 font-medium">Amount</th>
                   <th className="text-center px-5 py-3 font-medium">Status</th>
+                  {/* <th className="text-center px-5 py-3 font-medium"></th> */}
+
                 </tr>
               </thead>
               <tbody>
@@ -96,6 +104,8 @@ function InvoicesList() {
                     <td className="px-5 py-3.5 text-muted-foreground">{i.due_date ? formatDate(i.due_date) : "—"}</td>
                     <td className="px-5 py-3.5 text-right font-semibold">{inr(Number(i.total))}</td>
                     <td className="px-5 py-3.5 text-center"><Badge variant="outline" className={badgeCls(i.status)}>{i.status}</Badge></td>
+                    {/* <Button size="icon" variant="ghost" onClick={() => del(i.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button> */}
+
                   </tr>
                 ))}
               </tbody>

@@ -180,113 +180,97 @@ const grandTotal = totalAmount + cgst + sgst;
       </th>
       <th className="border border-gray-400 p-2 w-[10%]">HSN/SAC</th>
       <th className="border border-gray-400 p-2 w-[10%]">Qty</th>
+      <th className="border border-gray-400 p-2 w-[10%]">Unit</th>
       <th className="border border-gray-400 p-2 w-[15%]">Rate</th>
       <th className="border border-gray-400 p-2 w-[15%]">Amount</th>
     </tr>
   </thead>
 
   {/* BODY */}
-  <tbody>
-    {items.map((it, i) => (
-      <tr key={it.id}>
-        <td className="border border-gray-400 p-2 text-center align-top">
-          {i + 1}
-        </td>
+<tbody>
 
-        <td className="border border-gray-400 p-2 align-top">
-          <div className="font-medium">{it.name}</div>
-          {it.description && (
-            <div className="text-xs text-gray-600">{it.description}</div>
-          )}
-        </td>
+  {/* ITEMS */}
+  {items.map((it, i) => (
+    <tr key={i}>
+      <td className="border-r border-gray-400 p-2">{i + 1}</td>
+      <td className="border-r border-gray-400 p-2">{it.name}</td>
+      <td className="border-r border-gray-400 p-2">{it.hsn_code}</td>
+      <td className="border-r border-gray-400 p-2">{it.quantity}</td>
+      <td className="border-r border-gray-400 p-2 text-center uppercase">{it.unit}</td>
+      <td className="border-r border-gray-400 p-2 text-right">{it.unit_price}</td>
+      <td className="border-r border-gray-400 p-2 text-right">{it.taxable}</td>
+    </tr>
+  ))}
 
-        <td className="border border-gray-400 p-2 text-center">
-          {it.hsn_code}
-        </td>
-
-        <td className="border border-gray-400 p-2 text-right">
-          {it.quantity} {it.unit}
-        </td>
-
-        <td className="border border-gray-400 p-2 text-right">
-          {Number(it.unit_price).toFixed(2)}
-        </td>
-
-        <td className="border border-gray-400 p-2 text-right font-semibold">
-          {(Number(it.quantity) * Number(it.unit_price)).toFixed(2)}
-        </td>
-      </tr>
+  {/* EMPTY SPACE */}
+  <tr className="h-[120px]">
+    {Array(7).fill("").map((_, i) => (
+      <td key={i} className="border-r border-gray-400"></td>
     ))}
+  </tr>
 
-    {/* EMPTY SPACE LIKE PAPER */}
-    <tr className="h-[120px]">
-      <td className="border border-gray-400"></td>
-      <td className="border border-gray-400"></td>
-      <td className="border border-gray-400"></td>
-      <td className="border border-gray-400"></td>
-      <td className="border border-gray-400"></td>
-      <td className="border border-gray-400"></td>
-    </tr>
+  {/* TOTAL */}
+  <tr>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400 p-2 font-bold">TOTAL</td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
 
-    {/* TOTAL ROW */}
-    <tr>
-      <td className="border border-gray-400"></td>
+    <td className="border-r border-gray-400 p-2 text-right font-bold">
+      {inr(totalAmount)}
+    </td>
+  </tr>
 
-      <td className="border border-gray-400 p-2 font-bold">
-        TOTAL
-      </td>
+  {/* CGST */}
+  <tr>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
 
-      <td className="border border-gray-400"></td>
+    <td className="border-r border-gray-400 p-2 text-right italic">
+      CGST @9%
+    </td>
+    <td className="border-r border-gray-400 p-2 text-right">
+      {inr(cgst)}
+    </td>
+  </tr>
 
-      <td className="border border-gray-400"></td>
+  {/* SGST */}
+  <tr>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400 p-2 text-right italic">
+      SGST @9%
+    </td>
+    <td className="border-r border-gray-400 p-2 text-right">
+      {inr(sgst)}
+    </td>
+  </tr>
 
-      <td className="border border-gray-400"></td>
+  {/* GRAND TOTAL */}
+  <tr>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
+    <td className="border-r border-gray-400"></td>
 
-      <td className="border border-gray-400 p-2 text-right font-bold">
-        {inr(totalAmount)}
-      </td>
-    </tr>
+    <td className="border-r border-gray-400 p-2 text-right font-bold">
+      GRAND TOTAL
+    </td>
+    <td className="border-r border-gray-400 p-2 text-right font-bold">
+      {inr(grandTotal)}
+    </td>
+  </tr>
 
-    {/* CGST */}
-    <tr>
-      <td className="border border-gray-400"></td>
-
-      <td colSpan={4} className="border border-gray-400 p-2 text-right italic">
-        CGST @9%
-      </td>
-
-      <td className="border border-gray-400 p-2 text-right">
-        {inr(cgst)}
-      </td>
-    </tr>
-
-    {/* SGST */}
-    <tr>
-      <td className="border border-gray-400"></td>
-
-      <td colSpan={4} className="border border-gray-400 p-2 text-right italic">
-        SGST @9%
-      </td>
-
-      <td className="border border-gray-400 p-2 text-right">
-        {inr(sgst)}
-      </td>
-    </tr>
-
-    {/* GRAND TOTAL */}
-    <tr>
-      <td className="border border-gray-400"></td>
-
-      <td colSpan={4} className="border border-gray-400 p-2 text-right font-bold">
-        GRAND TOTAL
-      </td>
-
-      <td className="border border-gray-400 p-2 text-right font-bold">
-        {inr(grandTotal)}
-      </td>
-    </tr>
-
-  </tbody>
+</tbody>
 </table>
 
 

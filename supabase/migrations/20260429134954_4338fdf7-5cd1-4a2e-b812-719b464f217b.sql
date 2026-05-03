@@ -54,7 +54,7 @@ CREATE TABLE public.products (
   description TEXT,
   unit TEXT DEFAULT 'pcs',
   unit_price NUMERIC(12,2) NOT NULL DEFAULT 0,
-  gst_rate NUMERIC(5,2) NOT NULL DEFAULT 18,
+  -- gst_rate NUMERIC(5,2) NOT NULL DEFAULT 18,
   hsn_code TEXT,
   stock NUMERIC(12,2) DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -102,7 +102,7 @@ CREATE TABLE public.invoice_items (
   unit TEXT DEFAULT 'pcs',
   unit_price NUMERIC(12,2) NOT NULL DEFAULT 0,
   discount_pct NUMERIC(5,2) NOT NULL DEFAULT 0,
-  gst_rate NUMERIC(5,2) NOT NULL DEFAULT 18,
+  -- gst_rate NUMERIC(5,2) NOT NULL DEFAULT 18,
   taxable NUMERIC(12,2) NOT NULL DEFAULT 0,
   tax_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
   total NUMERIC(12,2) NOT NULL DEFAULT 0,

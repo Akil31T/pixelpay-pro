@@ -81,7 +81,7 @@ function NewInvoice() {
       subtotal += gross;
       totalDiscount += discountAmt;
       totalTax += taxAmt;
-      return { taxable, taxAmt, total: taxable + taxAmt };
+      return { taxable, taxAmt, total: taxable + taxAmt ,gross};
     });
     const cgst = isInterstate ? 0 : totalTax / 2;
     const sgst = isInterstate ? 0 : totalTax / 2;
@@ -287,7 +287,7 @@ function NewInvoice() {
                     <div className="md:col-span-2 space-y-1.5">
                       <Label className="text-xs">Total</Label>
                       <div className="h-10 flex items-center font-semibold text-sm">
-                        {inr(calc.lines[i]?.total || 0)}
+                        {inr(calc.lines[i]?.gross || 0)}
                       </div>
                     </div>
 

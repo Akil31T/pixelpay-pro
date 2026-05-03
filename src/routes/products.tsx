@@ -68,11 +68,11 @@ function Products() {
                 <div className="space-y-2"><Label>Stock</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
                 <div className="space-y-2"><Label>Unit price (₹)</Label><Input type="number" step="0.01" value={form.unit_price} onChange={(e) => setForm({ ...form, unit_price: e.target.value })} /></div>
                 <div className="space-y-2">
-                  <Label>GST rate</Label>
+                  {/* <Label>GST rate</Label>
                   <Select value={String(form.gst_rate)} onValueChange={(v) => setForm({ ...form, gst_rate: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>{[0, 5,9, 12, 18, 28].map((r) => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent>
-                  </Select>
+                  </Select> */}
                 </div>
               </div>
               <div className="flex justify-end gap-2 mt-2"><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={save} className="bg-primary hover:bg-primary-glow">Save</Button></div>
@@ -97,7 +97,7 @@ function Products() {
                   <th className="text-left px-5 py-3 font-medium">SKU</th>
                   <th className="text-left px-5 py-3 font-medium">HSN</th>
                   <th className="text-right px-5 py-3 font-medium">Price</th>
-                  <th className="text-right px-5 py-3 font-medium">GST</th>
+                  {/* <th className="text-right px-5 py-3 font-medium">GST</th> */}
                   <th className="text-right px-5 py-3 font-medium">Stock</th>
                   <th className="text-right px-5 py-3 font-medium">Actions</th>
                 </tr>
@@ -109,7 +109,7 @@ function Products() {
                     <td className="px-5 py-3.5 text-muted-foreground font-mono text-xs">{p.sku || "—"}</td>
                     <td className="px-5 py-3.5 text-muted-foreground font-mono text-xs">{p.hsn_code || "—"}</td>
                     <td className="px-5 py-3.5 text-right font-semibold">{inr(Number(p.unit_price))}</td>
-                    <td className="px-5 py-3.5 text-right text-muted-foreground">{Number(p.gst_rate)}%</td>
+                    {/* <td className="px-5 py-3.5 text-rigund">{Number(p.gst_rate)}%</td> */}
                     <td className="px-5 py-3.5 text-right text-muted-foreground">{Number(p.stock)} {p.unit}</td>
                     <td className="px-5 py-3.5 text-right">
                       <Button size="icon" variant="ghost" onClick={() => { setForm({ ...empty, ...p }); setEditId(p.id); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
