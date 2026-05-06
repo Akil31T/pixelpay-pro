@@ -18,7 +18,7 @@ export const Route = createFileRoute("/products")({
   component: () => <ProtectedRoute><Products /></ProtectedRoute>,
 });
 
-const empty = { name: "", sku: "", description: "", unit: "pcs", unit_price: 0, gst_rate: 18, hsn_code: "", stock: 0 };
+const empty = { name: "", sku: "", description: "", unit: "pcs", unit_price: 0, hsn_code: "", stock: 0 };
 
 function Products() {
   const { user } = useAuth();
@@ -32,7 +32,7 @@ function Products() {
 
   const save = async () => {
     if (!form.name) return toast.error("Name required");
-    const payload = { ...form, unit_price: Number(form.unit_price), gst_rate: Number(form.gst_rate), stock: Number(form.stock) };
+    const payload = { ...form, unit_price: Number(form.unit_price), stock: Number(form.stock) };
     if (editId) {
       const { error } = await supabase.from("products").update(payload).eq("id", editId);
       if (error) return toast.error(error.message);
@@ -68,11 +68,11 @@ function Products() {
                 <div className="space-y-2"><Label>Stock</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
                 <div className="space-y-2"><Label>Unit price (₹)</Label><Input type="number" step="0.01" value={form.unit_price} onChange={(e) => setForm({ ...form, unit_price: e.target.value })} /></div>
                 <div className="space-y-2">
-                  {/* <Label>GST rate</Label>
+                  <Label>GST rate</Label>
                   <Select value={String(form.gst_rate)} onValueChange={(v) => setForm({ ...form, gst_rate: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>{[0, 5,9, 12, 18, 28].map((r) => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent>
-                  </Select> */}
+                  </Select>
                 </div>
               </div>
               <div className="flex justify-end gap-2 mt-2"><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={save} className="bg-primary hover:bg-primary-glow">Save</Button></div>

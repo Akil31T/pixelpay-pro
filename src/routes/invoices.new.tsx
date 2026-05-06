@@ -36,6 +36,7 @@ function NewInvoice() {
   const [customerId, setCustomerId] = useState<string>("");
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
   const [dueDate, setDueDate] = useState("");
+  const [vehicleNo, setVehicleNo] = useState("");
   const [status, setStatus] = useState("pending");
   const [isInterstate, setIsInterstate] = useState(false);
   const [items, setItems] = useState<Item[]>([blankItem()]);
@@ -58,9 +59,11 @@ function NewInvoice() {
       // auto invoice number
       const lastNum = last.data?.[0]?.invoice_number || "";
       const m = lastNum.match(/(\d+)$/);
-      const next = m ? String(Number(m[1]) + 1).padStart(4, "0") : "0001";
+      const next = m ? String(Number(m[1]) + 1) : "1";
       const yr = new Date().getFullYear();
-      setInvoiceNumber(`INV-${yr}-${next}`);
+      // setInvoiceNumber(`INV-${yr}-${next}`);
+      setInvoiceNumber(`Invoice-${next}`);
+
     });
   }, []);
 
@@ -71,24 +74,76 @@ function NewInvoice() {
     if (c?.state) setIsInterstate(c.state.trim().toLowerCase() !== profile.state.trim().toLowerCase());
   }, [customerId, customers, profile]);
 
+  // const calc = useMemo(() => {
+  //   let subtotal = 0, totalDiscount = 0, totalTax = 0;
+  //   const lines = items.map((it) => {
+  //     const gross = it.quantity * it.unit_price;
+  //     const discountAmt = (gross * it.discount_pct) / 100;
+  //     const taxable = gross - discountAmt;
+  //     const taxAmt = (taxable * it.gst_rate) / 100;
+  //     subtotal += gross;
+  //     totalDiscount += discountAmt;
+  //     totalTax += taxAmt;
+  //     return { taxable, taxAmt, total: taxable + taxAmt ,gross};
+  //   });
+  //   const cgst = isInterstate ? 0 : totalTax / 2;
+  //   const sgst = isInterstate ? 0 : totalTax / 2;
+  //   const igst = isInterstate ? totalTax : 0;
+  //   const grandTotal = subtotal - totalDiscount + totalTax + Number(shipping || 0) + Number(extraCharge || 0);
+  //   return { subtotal, discount: totalDiscount, totalTax, cgst, sgst, igst, lines, grandTotal };
+  // }, [items, isInterstate, shipping, extraCharge]);
+
+
   const calc = useMemo(() => {
-    let subtotal = 0, totalDiscount = 0, totalTax = 0;
-    const lines = items.map((it) => {
-      const gross = it.quantity * it.unit_price;
-      const discountAmt = (gross * it.discount_pct) / 100;
-      const taxable = gross - discountAmt;
-      const taxAmt = (taxable * it.gst_rate) / 100;
-      subtotal += gross;
-      totalDiscount += discountAmt;
-      totalTax += taxAmt;
-      return { taxable, taxAmt, total: taxable + taxAmt ,gross};
-    });
-    const cgst = isInterstate ? 0 : totalTax / 2;
-    const sgst = isInterstate ? 0 : totalTax / 2;
-    const igst = isInterstate ? totalTax : 0;
-    const grandTotal = subtotal - totalDiscount + totalTax + Number(shipping || 0) + Number(extraCharge || 0);
-    return { subtotal, discount: totalDiscount, totalTax, cgst, sgst, igst, lines, grandTotal };
-  }, [items, isInterstate, shipping, extraCharge]);
+  let subtotal = 0;
+  let totalDiscount = 0;
+  let totalTax = 0;
+
+  const lines = items.map((it) => {
+    const qty = Number(it.quantity || 0);
+    const price = Number(it.unit_price || 0);
+    const discountPct = Number(it.discount_pct || 0);
+    const gstRate = Number(it.gst_rate || 0);
+
+    const gross = qty * price;
+    const discountAmt = (gross * discountPct) / 100;
+    const taxable = gross - discountAmt;
+    const taxAmt = (taxable * gstRate) / 100;
+
+    subtotal += gross;
+    totalDiscount += discountAmt;
+    totalTax += taxAmt;
+
+    return {
+      gross,
+      taxable,
+      taxAmt,
+      total: taxable + taxAmt,
+    };
+  });
+
+  const cgst = isInterstate ? 0 : totalTax / 2;
+  const sgst = isInterstate ? 0 : totalTax / 2;
+  const igst = isInterstate ? totalTax : 0;
+
+  const grandTotal =
+    subtotal -
+    totalDiscount +
+    totalTax +
+    Number(shipping || 0) +
+    Number(extraCharge || 0);
+
+  return {
+    subtotal,
+    discount: totalDiscount,
+    totalTax,
+    cgst,
+    sgst,
+    igst,
+    lines,
+    grandTotal: isNaN(grandTotal) ? 0 : grandTotal, // FIX
+  };
+}, [items, isInterstate, shipping, extraCharge]);
 
   const updateItem = (i: number, patch: Partial<Item>) => {
     setItems((prev) => prev.map((it, idx) => idx === i ? { ...it, ...patch } : it));
@@ -97,7 +152,7 @@ function NewInvoice() {
   const pickProduct = (i: number, productId: string) => {
     const p = products.find((x) => x.id === productId);
     if (!p) return;
-    updateItem(i, { name: p.name, description: p.description, hsn_code: p.hsn_code, unit: p.unit, unit_price: Number(p.unit_price), gst_rate: Number(p.gst_rate) });
+    updateItem(i, { name: p.name, description: p.description, hsn_code: p.hsn_code, unit: p.unit, unit_price: Number(p.unit_price) });
   };
 
   const save = async () => {
@@ -112,6 +167,7 @@ function NewInvoice() {
       customer_id: customerId,
       customer_snapshot: customer,
       invoice_date: invoiceDate,
+      vehicle_no: vehicleNo,
       due_date: dueDate || null,
       status,
       is_interstate: isInterstate,
@@ -135,7 +191,7 @@ function NewInvoice() {
       quantity: it.quantity, unit: it.unit,
       unit_price: it.unit_price,
       discount_pct: it.discount_pct,
-      gst_rate: it.gst_rate,
+      // gst_rate: it.gst_rate,
       taxable: calc.lines[idx].taxable,
       tax_amount: calc.lines[idx].taxAmt,
       total: calc.lines[idx].total,
@@ -191,6 +247,8 @@ function NewInvoice() {
                   </SelectContent>
                 </Select>
               </div>
+            <div className="space-y-2"><Label>Vehicle No</Label><Input value={vehicleNo} onChange={(e) => setVehicleNo(e.target.value)} /></div>
+
               <div className="flex items-center justify-between rounded-md border border-border px-3">
                 <div>
                   <Label className="cursor-pointer">Inter-state (IGST)</Label>

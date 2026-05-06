@@ -148,6 +148,7 @@ export type Database = {
           due_date: string | null
           id: string
           igst: number
+          vehicle_no: string | null
           invoice_date: string
           invoice_number: string
           is_interstate: boolean
@@ -168,6 +169,7 @@ export type Database = {
           customer_snapshot?: Json | null
           discount?: number
           due_date?: string | null
+          vehicle_no?: string | null
           id?: string
           igst?: number
           invoice_date?: string

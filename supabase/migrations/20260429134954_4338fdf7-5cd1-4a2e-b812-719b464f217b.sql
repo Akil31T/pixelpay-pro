@@ -67,6 +67,7 @@ CREATE TABLE public.invoices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   invoice_number TEXT NOT NULL,
+  vehicle_no TEXT,
   customer_id UUID REFERENCES public.customers(id) ON DELETE SET NULL,
   customer_snapshot JSONB,
   invoice_date DATE NOT NULL DEFAULT CURRENT_DATE,

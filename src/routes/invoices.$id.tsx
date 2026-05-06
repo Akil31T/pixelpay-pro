@@ -57,8 +57,9 @@ function InvoiceDetail() {
   );
 
   const cgst = totalAmount * 0.09;
-const sgst = totalAmount * 0.09;
-const grandTotal = totalAmount + cgst + sgst;
+  const sgst = totalAmount * 0.09;
+  const grandTotal = totalAmount + cgst + sgst;
+  
   return (
     <div className="p-6 md:p-10 max-w-5xl mx-auto">
       {/* Toolbar - hidden in print */}
@@ -91,7 +92,7 @@ const grandTotal = totalAmount + cgst + sgst;
         {/* Top section */}
         <div className="grid grid-cols-2 border-black border-1 ">
           {/* Seller */}
-          <div className="border-r-1 border-black  p-3">
+          <div className="border-r-1 border-black p-2">
             <h2 className="font-bold text-lg uppercase">
               {profile?.company_name || "Your Company"}
             </h2>
@@ -110,16 +111,18 @@ const grandTotal = totalAmount + cgst + sgst;
             )}
             {/* <p><b>Bank:</b> {profile.bank_name}</p>
             <p><b>A/C No:</b> {profile.bank_account}</p>
-            <p><b>IFSC:</b> {profile.bank_ifsc}</p>
-            <p><b>PAN No:</b> {profile.pan_no} BRWPJ3042D</p> */}
+            <p><b>IFSC:</b> {profile.bank_ifsc}</p> */}
+            <p><b>PAN No:</b> {profile.pan_no}</p>
           </div>
 
           {/* Invoice info */}
           <div>
-            <div className="grid grid-cols-2 border-black border-b ">
-              <div className="p-2 border-black  border-r ">
+            {/* Row 1 */}
+            <div className="grid grid-cols-2 border-black border-b">
+              <div className="p-1 border-black border-r">
                 <b>Invoice No.</b>
                 <p>{inv.invoice_number}</p>
+                <p>2026-2027</p>
               </div>
 
               <div className="p-2">
@@ -128,158 +131,185 @@ const grandTotal = totalAmount + cgst + sgst;
               </div>
             </div>
 
-            <div className="grid grid-cols-2 border-black  border-b ">
-              <div className="p-2 border-black border-r ">
+            {/* Row 2 (FIX HERE) */}
+            <div className="grid grid-cols-2 border-black border-b items-stretch">
+              <div className="p-2 border-black border-r capitalize flex flex-col justify-between">
                 <b>Status</b>
                 <p>{inv.status}</p>
               </div>
 
-              <div className="p-2">
-                <b>Tax Type</b>
-                <p>{inv.is_interstate ? "IGST" : "CGST + SGST"}</p>
+              <div className="p-2 flex flex-col justify-between">
+                <b>Delivery Note</b>
+                {/* <p>{inv.is_interstate ? "IGST" : "CGST + SGST"}</p> */}
               </div>
             </div>
 
-            <div className="p-2">
-              <b>Vehicle No.</b>
-              <p>TN67 AC 4856</p>
+            <div className="grid grid-cols-2 border-black items-stretch">
+              <div className="p-2 border-black border-r flex flex-col justify-between">
+                <b>Due Date</b>
+                {/* <p className="p-2">{inv.due_date}</p> */}
+              </div>
+
+              <div className="p-2 flex flex-col justify-between">
+                <b>Vehicle No.</b>
+                <p>{inv.vehicle_no}</p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Buyer */}
-        <div className="border-x-1 border-b-1 border-black  p-3">
-          <h3 className="font-bold mb-1">Buyer (Bill to)</h3>
+        <div className="grid grid-cols-2 border-x border-b border-black">
+          {/* Buyer */}
+          <div className="border-r border-black p-2">
+            <h3 className="font-bold mb-1">Buyer (Bill to)</h3>
 
-          <p className="font-semibold text-base">{cust.name}</p>
+            <p className="font-semibold text-base">{cust.name}</p>
 
-          {cust.billing_address && <p>{cust.billing_address}</p>}
+            {cust.billing_address && <p>{cust.billing_address}</p>}
 
-          <p>
-            {[cust.city, cust.state, cust.pincode]
-              .filter(Boolean)
-              .join(", ")}
-          </p>
+            {/* <p>
+              {[cust.city, cust.state, cust.pincode]
+                .filter(Boolean)
+                .join(", ")}
+            </p> */}
 
-          {cust.gstin && (
-            <p>
-              <b>GSTIN/UIN:</b> {cust.gstin}
-            </p>
-          )}
+            {cust.gstin && (
+              <p>
+                <b>GSTIN:</b> {cust.gstin}
+              </p>
+            )}
+          </div>
+
+          {/* Vehicle */}  
+          <div className="p-2">
+           <b>Terms of Delivery</b>
+                <p>{inv.terms_of_delivery}</p>
+          </div>
         </div>
 
         {/* Items */}
-<table className="mt-2 w-full border border-gray-400 border-collapse h-[400px] text-[12px]">
+        <table className="mt-2 w-full border border-gray-400 border-collapse h-[400px] text-[12px]">
 
-  {/* HEADER */}
-  <thead>
-    <tr className="bg-blue-600 text-white">
-      <th className="border border-gray-400 p-2 w-[5%]">Sl No.</th>
-      <th className="border border-gray-400 p-2 text-left w-[35%]">
-        Description of Goods
-      </th>
-      <th className="border border-gray-400 p-2 w-[10%]">HSN/SAC</th>
-      <th className="border border-gray-400 p-2 w-[10%]">Qty</th>
-      <th className="border border-gray-400 p-2 w-[10%]">Unit</th>
-      <th className="border border-gray-400 p-2 w-[15%]">Rate</th>
-      <th className="border border-gray-400 p-2 w-[15%]">Amount</th>
-    </tr>
-  </thead>
+          {/* HEADER */}
+          <thead>
+            <tr className="bg-blue-600 text-white">
+              <th className="border border-gray-400 p-2 w-[5%]">Sl No.</th>
+              <th className="border border-gray-400 p-2 text-left w-[35%]">
+                Description of Goods
+              </th>
+              <th className="border border-gray-400 p-2 w-[10%]">HSN/SAC</th>
+              <th className="border border-gray-400 p-2 w-[10%]">Qty</th>
+              <th className="border border-gray-400 p-2 w-[10%]">Unit</th>
+              <th className="border border-gray-400 p-2 w-[15%]">Rate</th>
+              <th className="border border-gray-400 p-2 w-[15%]">Amount</th>
+            </tr>
+          </thead>
 
-  {/* BODY */}
-<tbody>
+          {/* BODY */}
+          <tbody>
 
-  {/* ITEMS */}
-  {items.map((it, i) => (
-    <tr key={i}>
-      <td className="border-r border-gray-400 p-2">{i + 1}</td>
-      <td className="border-r border-gray-400 p-2">{it.name}</td>
-      <td className="border-r border-gray-400 p-2">{it.hsn_code}</td>
-      <td className="border-r border-gray-400 p-2">{it.quantity}</td>
-      <td className="border-r border-gray-400 p-2 text-center uppercase">{it.unit}</td>
-      <td className="border-r border-gray-400 p-2 text-right">{it.unit_price}</td>
-      <td className="border-r border-gray-400 p-2 text-right">{it.taxable}</td>
-    </tr>
-  ))}
+            {/* ITEMS */}
+            {items.map((it, i) => (
+              <tr key={i}>
+                <td className="border-r border-gray-400 p-2">{i + 1}</td>
+                <td className="border-r border-gray-400 p-2">{it.name}</td>
+                <td className="border-r border-gray-400 p-2">{it.hsn_code}</td>
+                <td className="border-r border-gray-400 p-2 text-center">{it.quantity}</td>
+                <td className="border-r border-gray-400 p-2 text-center uppercase">{it.unit}</td>
+                <td className="border-r border-gray-400 p-2 text-right">₹{it.unit_price}</td>
+                <td className="border-r border-gray-400 p-2 text-right">₹{it.taxable}</td>
+              </tr>
+            ))}
 
-  {/* EMPTY SPACE */}
-  <tr className="h-[120px]">
-    {Array(7).fill("").map((_, i) => (
-      <td key={i} className="border-r border-gray-400"></td>
-    ))}
-  </tr>
+            {/* EMPTY SPACE */}
+            <tr className="h-[120px]">
+              {Array(7).fill("").map((_, i) => (
+                <td key={i} className="border-r border-gray-400"></td>
+              ))}
+            </tr>
 
-  {/* TOTAL */}
-  <tr>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400 p-2 font-bold">TOTAL</td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
+            {/* TOTAL */}
+            <tr>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
 
-    <td className="border-r border-gray-400 p-2 text-right font-bold">
-      {inr(totalAmount)}
-    </td>
-  </tr>
+              <td className="border-r border-gray-400 p-2 text-right font-bold">
+                {inr(totalAmount)}
+              </td>
+            </tr>
 
-  {/* CGST */}
-  <tr>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
+            {/* CGST */}
+            <tr>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
 
-    <td className="border-r border-gray-400 p-2 text-right italic">
-      CGST @9%
-    </td>
-    <td className="border-r border-gray-400 p-2 text-right">
-      {inr(cgst)}
-    </td>
-  </tr>
+              <td className="border-r border-gray-400 p-2 text-right italic">
+                CGST @9%
+              </td>
+              <td className="border-r border-gray-400 p-2 text-right">
+                {inr(cgst)}
+              </td>
+            </tr>
 
-  {/* SGST */}
-  <tr>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400 p-2 text-right italic">
-      SGST @9%
-    </td>
-    <td className="border-r border-gray-400 p-2 text-right">
-      {inr(sgst)}
-    </td>
-  </tr>
+            {/* SGST */}
+            <tr>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400 p-2 text-right italic">
+                SGST @9%
+              </td>
+              <td className="border-r border-gray-400 p-2 text-right">
+                {inr(sgst)}
+              </td>
+            </tr>
 
-  {/* GRAND TOTAL */}
-  <tr>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
-    <td className="border-r border-gray-400"></td>
+            {/* GRAND TOTAL */}
+            <tr>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
+              <td className="border-r border-gray-400"></td>
 
-    <td className="border-r border-gray-400 p-2 text-right font-bold">
-      GRAND TOTAL
-    </td>
-    <td className="border-r border-gray-400 p-2 text-right font-bold">
-      {inr(grandTotal)}
-    </td>
-  </tr>
+              {/* <td className="border-r border-gray-400 p-2 text-right font-bold">
+                GRAND TOTAL
+              </td>
+              <td className="border-r border-gray-400 p-2 text-right font-bold">
+                {inr(grandTotal)}
+              </td> */}
+            </tr>
 
-</tbody>
-</table>
+          </tbody>
+        </table>
 
 
         {/* Taxable value in words */}
-        <div className="border-x-1 border-b border-black  p-3">
-          <b>Total Amount (in words):</b>
-          <p className="mt-1 font-semibold">
-            {numberToWordsINR(Number(grandTotal))}
-          </p>
+        <div className="grid grid-cols-2 border-x-1 border-b border-black  p-3">
+          <div>
+            <b>Total Amount (in words):</b>
+            <p className="mt-1 font-semibold">
+              {numberToWordsINR(Number(grandTotal))}
+            </p>
+          </div>
+          <div>
+
+            <p className="font-bold flex justify-end gap-12">
+              <span>Total:</span>
+              <span>{inr(grandTotal)}</span>
+            </p>
+          </div>
+
         </div>
         {/* Footer */}
         <div className="grid grid-cols-2 border-x-1 border-black  border-b-1 ">
@@ -297,7 +327,7 @@ const grandTotal = totalAmount + cgst + sgst;
                 <p>Bank: {profile.bank_name}</p>
                 <p>A/C No: {profile.bank_account}</p>
                 <p>IFSC: {profile.bank_ifsc}</p>
-                <p>PAN No: {profile.pan_no}BRWPJ3042D</p>
+                <p>PAN No: {profile.pan_no}</p>
               </>
             )}
           </div>
@@ -312,7 +342,7 @@ const grandTotal = totalAmount + cgst + sgst;
             </div>
           </div>
         </div>
-{/* 
+        {/* 
         <div className="text-center mt-3 text-xs">
           This is a Computer Generated Invoice
         </div> */}

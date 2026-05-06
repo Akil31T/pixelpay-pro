@@ -10,28 +10,42 @@ export function useRole() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      setRole(null);
-      setLoading(false);
-      return;
-    }
-    supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .order("role")
-      .then(({ data }) => {
-        const roles = (data ?? []).map((r: any) => r.role as AppRole);
-        // priority: super_admin > admin > staff
-        const r =
-          roles.find((x) => x === "super_admin") ??
-          roles.find((x) => x === "admin") ??
-          roles.find((x) => x === "staff") ??
-          "staff";
-        setRole(r);
+    const getRole = async () => {
+      if (authLoading) return;
+
+      if (!user) {
+        setRole(null);
         setLoading(false);
-      });
+        return;
+      }
+
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error(error);
+        setRole("staff");
+        setLoading(false);
+        return;
+      }
+
+      const roles = (data ?? []).map((r: any) => r.role as AppRole);
+
+      const selected =
+        roles.find((x) => x === "super_admin") ??
+        roles.find((x) => x === "admin") ??
+        roles.find((x) => x === "staff") ??
+        "staff";
+
+      setRole(selected);
+      setLoading(false); // important
+    };
+
+    getRole();
   }, [user, authLoading]);
 
   const can = {

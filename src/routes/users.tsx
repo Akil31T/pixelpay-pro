@@ -32,23 +32,67 @@ function UsersPage() {
   const [activity, setActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
+const load = async () => {
+  try {
     setLoading(true);
-    const [{ data: profiles }, { data: roles }, { data: log }] = await Promise.all([
-      supabase.from("profiles").select("id,email,full_name,company_name,is_active,created_at").order("created_at", { ascending: false }),
-      supabase.from("user_roles").select("user_id,role"),
-      supabase.from("login_activity").select("*").order("created_at", { ascending: false }).limit(100),
+
+    const [profilesRes, rolesRes, logRes] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false }),
+
+      supabase
+        .from("user_roles")
+        .select("user_id,role"),
+
+      supabase
+        .from("login_activity")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100),
     ]);
+
+    console.log("profiles:", profilesRes);
+    console.log("roles:", rolesRes);
+    console.log("activity:", logRes);
+
+    if (profilesRes.error) throw profilesRes.error;
+    if (rolesRes.error) throw rolesRes.error;
+    if (logRes.error) throw logRes.error;
+
+    const profiles = profilesRes.data ?? [];
+    const roles = rolesRes.data ?? [];
+    const log = logRes.data ?? [];
+
     const roleMap = new Map<string, AppRole>();
-    (roles ?? []).forEach((r: any) => {
+
+    roles.forEach((r: any) => {
       const existing = roleMap.get(r.user_id);
-      const priority = (x: AppRole) => (x === "super_admin" ? 3 : x === "admin" ? 2 : 1);
-      if (!existing || priority(r.role) > priority(existing)) roleMap.set(r.user_id, r.role);
+
+      const priority = (x: AppRole) =>
+        x === "super_admin" ? 3 :
+        x === "admin" ? 2 : 1;
+
+      if (!existing || priority(r.role) > priority(existing)) {
+        roleMap.set(r.user_id, r.role);
+      }
     });
-    setRows((profiles ?? []).map((p: any) => ({ ...p, role: roleMap.get(p.id) ?? "staff" })));
-    setActivity(log ?? []);
+
+    const merged = profiles.map((p: any) => ({
+      ...p,
+      role: roleMap.get(p.id) ?? "staff",
+    }));
+
+    setRows(merged);
+    setActivity(log);
+  } catch (err: any) {
+    console.error(err);
+    toast.error(err.message);
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   useEffect(() => {
     if (!roleLoading && role === "super_admin") load();
@@ -70,6 +114,8 @@ function UsersPage() {
     toast.success(isActive ? "User deactivated" : "User activated");
     load();
   };
+
+  
 
   if (roleLoading || loading) {
     return (
