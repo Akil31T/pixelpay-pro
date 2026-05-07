@@ -108,15 +108,43 @@ const load = async () => {
     load();
   };
 
-  const toggleActive = async (userId: string, isActive: boolean) => {
-    const { error } = await supabase.from("profiles").update({ is_active: !isActive }).eq("id", userId);
-    if (error) return toast.error(error.message);
-    toast.success(isActive ? "User deactivated" : "User activated");
-    load();
-  };
+  // const toggleActive = async (userId: string, isActive: boolean) => {
+  //   const { error } = await supabase.from("profiles").update({ is_active: !isActive }).eq("id", userId);
+  //   if (error) return toast.error(error.message);
+  //   toast.success(isActive ? "User deactivated" : "User activated");
+  //   load();
+  // };
 
   
+const toggleActive = async (userId: string, isActive: boolean) => {
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({
+        is_active: !isActive,
+      })
+      .eq("id", userId)
+      .select();
 
+    console.log("updated:", data);
+
+    if (error) {
+      console.error(error);
+      return toast.error(error.message);
+    }
+
+    toast.success(
+      isActive
+        ? "User deactivated successfully"
+        : "User activated successfully"
+    );
+
+    load();
+  } catch (err: any) {
+    console.error(err);
+    toast.error(err.message);
+  }
+};
   if (roleLoading || loading) {
     return (
       <div className="p-10 flex items-center gap-2 text-muted-foreground text-sm">
