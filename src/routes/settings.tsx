@@ -20,18 +20,59 @@ function Settings() {
   const [form, setForm] = useState<any>({});
   const [busy, setBusy] = useState(false);
 
+  // useEffect(() => {
+  //   supabase.from("profiles").select("*").maybeSingle().then(({ data }) => setForm(data || {}));
+  // }, []);
+
   useEffect(() => {
-    supabase.from("profiles").select("*").maybeSingle().then(({ data }) => setForm(data || {}));
-  }, []);
+    const fetchProfile = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setForm(data || {});
+    };
+
+    fetchProfile();
+  }, [user]);
 
   const save = async () => {
     if (!user) return;
+
     setBusy(true);
-    const { error } = await supabase.from("profiles").upsert({ ...form, id: user.id, updated_at: new Date().toISOString() });
+
+    const { error } = await supabase.from("profiles").upsert({
+      ...form,
+      id: user.id,
+      updated_at: new Date().toISOString(),
+    });
+
     setBusy(false);
-    if (error) toast.error(error.message);
-    else toast.success("Company details saved");
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Company details saved");
+    }
   };
+
+  // const save = async () => {
+  //   if (!user) return;
+  //   setBusy(true);
+  //   const { error } = await supabase.from("profiles").upsert({ ...form, id: user.id, updated_at: new Date().toISOString() });
+  //   setBusy(false);
+  //   if (error) toast.error(error.message);
+  //   else toast.success("Company details saved");
+  // };
 
   const Field = ({ k, label, type = "text", full = false }: any) => (
     <div className={`space-y-2 ${full ? "md:col-span-2" : ""}`}>
@@ -74,7 +115,7 @@ function Settings() {
             <Field k="bank_name" label="Bank name" />
             <Field k="bank_account" label="Account number" />
             <Field k="bank_ifsc" label="IFSC code" />
-            <Field k="pan_no" label="PAN Number" />
+            {/* <Field k="pan_no" label="PAN Number" /> */}
 
           </div>
         </section>

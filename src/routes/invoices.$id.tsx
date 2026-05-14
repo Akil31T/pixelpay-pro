@@ -20,14 +20,58 @@ function InvoiceDetail() {
   const [items, setItems] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
 
+  // useEffect(() => {
+  //   Promise.all([
+  //     supabase.from("invoices").select("*").eq("id", id).single(),
+  //     supabase.from("invoice_items").select("*").eq("invoice_id", id).order("position"),
+  //     supabase.from("profiles").select("*").maybeSingle(),
+  //   ]).then(([i, it, p]) => {
+  //     setInv(i.data); setItems(it.data || []); setProfile(p.data);
+  //   });
+  // }, [id]);
+
   useEffect(() => {
-    Promise.all([
-      supabase.from("invoices").select("*").eq("id", id).single(),
-      supabase.from("invoice_items").select("*").eq("invoice_id", id).order("position"),
-      supabase.from("profiles").select("*").maybeSingle(),
-    ]).then(([i, it, p]) => {
-      setInv(i.data); setItems(it.data || []); setProfile(p.data);
-    });
+    const loadData = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) return;
+
+        const [i, it, p] = await Promise.all([
+          supabase
+            .from("invoices")
+            .select("*")
+            .eq("id", id)
+            .single(),
+
+          supabase
+            .from("invoice_items")
+            .select("*")
+            .eq("invoice_id", id)
+            .order("position"),
+
+          supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id) // IMPORTANT FIX
+            .single(),
+        ]);
+
+        if (i.error) console.error(i.error);
+        if (it.error) console.error(it.error);
+        if (p.error) console.error(p.error);
+
+        setInv(i.data);
+        setItems(it.data || []);
+        setProfile(p.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadData();
   }, [id]);
 
   const updateStatus = async (s: string) => {
@@ -59,7 +103,7 @@ function InvoiceDetail() {
   const cgst = totalAmount * 0.09;
   const sgst = totalAmount * 0.09;
   const grandTotal = totalAmount + cgst + sgst;
-  
+
   return (
     <div className="p-6 md:p-10 max-w-5xl mx-auto">
       {/* Toolbar - hidden in print */}
@@ -112,7 +156,7 @@ function InvoiceDetail() {
             {/* <p><b>Bank:</b> {profile.bank_name}</p>
             <p><b>A/C No:</b> {profile.bank_account}</p>
             <p><b>IFSC:</b> {profile.bank_ifsc}</p> */}
-            <p><b>PAN No:</b> {profile.pan_no}</p>
+            {/* <p><b>PAN No:</b> {profile.pan_no}</p> */}
           </div>
 
           {/* Invoice info */}
@@ -181,10 +225,10 @@ function InvoiceDetail() {
             )}
           </div>
 
-          {/* Vehicle */}  
+          {/* Vehicle */}
           <div className="p-2">
-           <b>Terms of Delivery</b>
-                <p>{inv.terms_of_delivery}</p>
+            <b>Terms of Delivery</b>
+            <p>{inv.terms_of_delivery}</p>
           </div>
         </div>
 
@@ -327,7 +371,7 @@ function InvoiceDetail() {
                 <p>Bank: {profile.bank_name}</p>
                 <p>A/C No: {profile.bank_account}</p>
                 <p>IFSC: {profile.bank_ifsc}</p>
-                <p>PAN No: {profile.pan_no}</p>
+                {/* <p>PAN No: {profile.pan_no}</p> */}
               </>
             )}
           </div>

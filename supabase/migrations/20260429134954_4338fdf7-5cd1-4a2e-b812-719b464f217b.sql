@@ -16,7 +16,7 @@ CREATE TABLE public.profiles (
   bank_name TEXT,
   bank_account TEXT,
   bank_ifsc TEXT,
-  pan_no TEXT,
+  -- pan_no TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
