@@ -8,6 +8,13 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   build: {
-    ssr: true
+  rollupOptions: {
+    output: {
+      manualChunks: {
+        vendor: ["react", "react-dom"],
+        supabase: ["@supabase/supabase-js"]
+      }
+    }
   }
+}
 });
