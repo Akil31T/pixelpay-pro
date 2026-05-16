@@ -24,22 +24,29 @@ function Customers() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<any>(empty);
   const [editId, setEditId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const load = () => supabase.from("customers").select("*").order("name").then(({ data }) => setList(data || []));
   useEffect(() => { load(); }, []);
 
   const save = async () => {
     if (!form.name) return toast.error("Name required");
-    if (editId) {
-      const { error } = await supabase.from("customers").update(form).eq("id", editId);
-      if (error) return toast.error(error.message);
-      toast.success("Customer updated");
-    } else {
-      const { error } = await supabase.from("customers").insert({ ...form, user_id: user!.id });
-      if (error) return toast.error(error.message);
-      toast.success("Customer added");
+    if (saving) return;
+    setSaving(true);
+    try {
+      if (editId) {
+        const { error } = await supabase.from("customers").update(form).eq("id", editId);
+        if (error) { toast.error(error.message); return; }
+        toast.success("Customer updated");
+      } else {
+        const { error } = await supabase.from("customers").insert({ ...form, user_id: user!.id });
+        if (error) { toast.error(error.message); return; }
+        toast.success("Customer added");
+      }
+      setOpen(false); setForm(empty); setEditId(null); load();
+    } finally {
+      setSaving(false);
     }
-    setOpen(false); setForm(empty); setEditId(null); load();
   };
 
   const del = async (id: string) => {
@@ -68,7 +75,7 @@ function Customers() {
                 <div className="space-y-2"><Label>Pincode</Label><Input value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} /></div>
                 <div className="space-y-2"><Label>State code</Label><Input value={form.state_code} onChange={(e) => setForm({ ...form, state_code: e.target.value })} /></div>
               </div>
-              <div className="flex justify-end gap-2 mt-2"><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={save} className="bg-primary hover:bg-primary-glow">Save</Button></div>
+              <div className="flex justify-end gap-2 mt-2"><Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>Cancel</Button><Button onClick={save} disabled={saving} className="bg-primary hover:bg-primary-glow">{saving ? "Saving…" : "Save"}</Button></div>
             </DialogContent>
           </Dialog>
         }
@@ -82,35 +89,59 @@ function Customers() {
             <p className="text-sm text-muted-foreground mb-5">Add your first customer to start invoicing.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="text-left px-5 py-3 font-medium">Name</th>
-                  <th className="text-left px-5 py-3 font-medium">GSTIN</th>
-                  <th className="text-left px-5 py-3 font-medium">Email</th>
-                  <th className="text-left px-5 py-3 font-medium">Phone</th>
-                  <th className="text-left px-5 py-3 font-medium">State</th>
-                  <th className="text-right px-5 py-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {list.map((c) => (
-                  <tr key={c.id} className="border-t border-border hover:bg-muted/30">
-                    <td className="px-5 py-3.5 font-medium">{c.name}</td>
-                    <td className="px-5 py-3.5 text-muted-foreground font-mono text-xs">{c.gstin || "—"}</td>
-                    <td className="px-5 py-3.5 text-muted-foreground">{c.email || "—"}</td>
-                    <td className="px-5 py-3.5 text-muted-foreground">{c.phone || "—"}</td>
-                    <td className="px-5 py-3.5 text-muted-foreground">{c.state || "—"}</td>
-                    <td className="px-5 py-3.5 text-right">
-                      <Button size="icon" variant="ghost" onClick={() => { setForm({ ...empty, ...c }); setEditId(c.id); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="ghost" onClick={() => del(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                    </td>
+          <>
+            {/* Mobile card view */}
+            <div className="md:hidden divide-y divide-border overflow-y-auto max-h-[calc(100dvh-260px)]">
+              {list.map((c) => (
+                <div key={c.id} className="p-4 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm truncate mb-0.5">{c.name}</div>
+                    {c.gstin && <div className="text-xs font-mono text-muted-foreground mb-0.5">{c.gstin}</div>}
+                    <div className="text-xs text-muted-foreground space-x-2">
+                      {c.phone && <span>{c.phone}</span>}
+                      {c.email && <span className="truncate">{c.email}</span>}
+                      {c.state && <span>{c.state}</span>}
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 gap-0.5">
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setForm({ ...empty, ...c }); setEditId(c.id); setOpen(true); }}><Pencil className="h-3.5 w-3.5" /></Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => del(c.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table view */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm [table-layout:fixed]">
+                <thead className="[display:table] w-full [table-layout:fixed] bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="text-left px-5 py-3 font-medium w-[24%]">Name</th>
+                    <th className="text-left px-5 py-3 font-medium w-[20%]">GSTIN</th>
+                    <th className="text-left px-5 py-3 font-medium w-[22%]">Email</th>
+                    <th className="text-left px-5 py-3 font-medium w-[14%]">Phone</th>
+                    <th className="text-left px-5 py-3 font-medium w-[10%]">State</th>
+                    <th className="text-right px-5 py-3 font-medium w-[10%]">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="block overflow-y-auto max-h-[calc(100dvh-260px)]">
+                  {list.map((c) => (
+                    <tr key={c.id} className="[display:table] w-full [table-layout:fixed] border-t border-border hover:bg-muted/30">
+                      <td className="px-5 py-3.5 font-medium w-[24%] truncate">{c.name}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground font-mono text-xs w-[20%] truncate">{c.gstin || "—"}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground w-[22%] truncate">{c.email || "—"}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground w-[14%] truncate">{c.phone || "—"}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground w-[10%] truncate">{c.state || "—"}</td>
+                      <td className="px-5 py-3.5 text-right w-[10%]">
+                        <Button size="icon" variant="ghost" onClick={() => { setForm({ ...empty, ...c }); setEditId(c.id); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => del(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

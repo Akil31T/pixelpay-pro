@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, Search, FileText, Trash2 } from "lucide-react";
+import { Plus, Search, FileText } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -39,12 +39,9 @@ function InvoicesList() {
     pending: "bg-warning/15 text-warning border-warning/40",
     partial: "bg-chart-3/15 text-chart-3 border-chart-3/30",
   } as Record<string, string>)[s] || "bg-muted text-muted-foreground border-border";
-  const load = () => supabase.from("products").select("*").order("name").then(({ data }) => setList(data || []));
-
   // const del = async (id: string) => {
   //   if (!confirm("Delete Invoice?")) return;
   //   await supabase.from("invoices").delete().eq("id", id);
-  //   load();
   // };
   return (
     <div className="p-6 md:p-10 max-w-[1400px] mx-auto">
@@ -81,36 +78,59 @@ function InvoicesList() {
             <Button onClick={() => navigate({ to: "/invoices/new" })}>Create invoice</Button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="text-left px-5 py-3 font-medium">Invoice #</th>
-                  <th className="text-left px-5 py-3 font-medium">Customer</th>
-                  <th className="text-left px-5 py-3 font-medium">Date</th>
-                  <th className="text-left px-5 py-3 font-medium">Due</th>
-                  <th className="text-right px-5 py-3 font-medium">Amount</th>
-                  <th className="text-center px-5 py-3 font-medium">Status</th>
-                  {/* <th className="text-center px-5 py-3 font-medium"></th> */}
+          <>
+            {/* Mobile card view */}
+            <div className="md:hidden divide-y divide-border overflow-y-auto max-h-[calc(100dvh-310px)]">
+              {filtered.map((i) => (
+                <div
+                  key={i.id}
+                  className="p-4 hover:bg-muted/30 active:bg-muted/50 cursor-pointer"
+                  onClick={() => navigate({ to: "/invoices/$id", params: { id: i.id } })}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <span className="font-semibold text-sm truncate">{i.invoice_number}</span>
+                    <Badge variant="outline" className={`${badgeCls(i.status)} shrink-0`}>{i.status}</Badge>
+                  </div>
+                  <div className="text-sm font-medium mb-1.5 truncate">{i.customer_snapshot?.name || "—"}</div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(i.invoice_date)}
+                      {i.due_date ? ` · Due ${formatDate(i.due_date)}` : ""}
+                    </span>
+                    <span className="font-semibold text-sm text-primary shrink-0">{inr(Number(i.total))}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((i) => (
-                  <tr key={i.id} className="border-t border-border hover:bg-muted/30 cursor-pointer" onClick={() => navigate({ to: "/invoices/$id", params: { id: i.id } })}>
-                    <td className="px-5 py-3.5 font-medium">{i.invoice_number}</td>
-                    <td className="px-5 py-3.5">{i.customer_snapshot?.name || "—"}</td>
-                    <td className="px-5 py-3.5 text-muted-foreground">{formatDate(i.invoice_date)}</td>
-                    <td className="px-5 py-3.5 text-muted-foreground">{i.due_date ? formatDate(i.due_date) : "—"}</td>
-                    <td className="px-5 py-3.5 text-right font-semibold">{inr(Number(i.total))}</td>
-                    <td className="px-5 py-3.5 text-center"><Badge variant="outline" className={badgeCls(i.status)}>{i.status}</Badge></td>
-                    {/* <Button size="icon" variant="ghost" onClick={() => del(i.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button> */}
-
+            {/* Desktop table view */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm [table-layout:fixed]">
+                <thead className="[display:table] w-full [table-layout:fixed] bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="text-left px-5 py-3 font-medium w-[18%]">Invoice #</th>
+                    <th className="text-left px-5 py-3 font-medium w-[24%]">Customer</th>
+                    <th className="text-left px-5 py-3 font-medium w-[14%]">Date</th>
+                    <th className="text-left px-5 py-3 font-medium w-[14%]">Due</th>
+                    <th className="text-right px-5 py-3 font-medium w-[15%]">Amount</th>
+                    <th className="text-center px-5 py-3 font-medium w-[15%]">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="block overflow-y-auto max-h-[calc(100dvh-310px)]">
+                  {filtered.map((i) => (
+                    <tr key={i.id} className="[display:table] w-full [table-layout:fixed] border-t border-border hover:bg-muted/30 cursor-pointer" onClick={() => navigate({ to: "/invoices/$id", params: { id: i.id } })}>
+                      <td className="px-5 py-3.5 font-medium w-[18%] truncate">{i.invoice_number}</td>
+                      <td className="px-5 py-3.5 w-[24%] truncate">{i.customer_snapshot?.name || "—"}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground w-[14%]">{formatDate(i.invoice_date)}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground w-[14%]">{i.due_date ? formatDate(i.due_date) : "—"}</td>
+                      <td className="px-5 py-3.5 text-right font-semibold w-[15%]">{inr(Number(i.total))}</td>
+                      <td className="px-5 py-3.5 text-center w-[15%]"><Badge variant="outline" className={badgeCls(i.status)}>{i.status}</Badge></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

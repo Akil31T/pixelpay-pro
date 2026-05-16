@@ -105,10 +105,10 @@ function InvoiceDetail() {
   const grandTotal = totalAmount + cgst + sgst;
 
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto">
+    <div className="p-3 md:p-6 lg:p-10 max-w-5xl mx-auto">
       {/* Toolbar - hidden in print */}
-      <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3">
-        <button onClick={() => navigate({ to: "/invoices" })} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+      <div className="no-print mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <button onClick={() => navigate({ to: "/invoices" })} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 self-start">
           <ArrowLeft className="h-4 w-4" /> Back to invoices
         </button>
         <div className="flex flex-wrap gap-2 items-center">
@@ -120,12 +120,33 @@ function InvoiceDetail() {
               <SelectItem value="partial">Partial</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={() => window.print()}><Printer className="h-4 w-4" /> Print</Button>
-          <Button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-600-glow"><Download className="h-4 w-4" /> Save as PDF</Button>
+          <Button variant="outline" size="sm" onClick={() => window.print()}><Printer className="h-4 w-4" /> <span className="hidden sm:inline">Print</span></Button>
+          <Button size="sm" onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-700"><Download className="h-4 w-4" /> <span className="hidden sm:inline">Save as PDF</span></Button>
         </div>
       </div>
+      {/* Print styles injected inline so they travel with the component */}
+      <style>{`
+        @media print {
+          thead { display: table-header-group !important; }
+          tbody { display: table-row-group !important; }
+          tr    { page-break-inside: avoid; break-inside: avoid; }
+          thead tr th {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .print-no-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+        }
+      `}</style>
+
+      {/* Scroll wrapper — keeps invoice layout intact on small screens */}
+      <div className="no-print-wrapper overflow-x-auto -mx-3 md:mx-0 print:overflow-visible">
       {/* Invoice Paper */}
-      <div className="bg-white text-black border-1 border-black  rounded-none p-6 print:p-4 print: text-[13px] leading-tight">
+      <div className="bg-white text-black border-1 border-black rounded-none p-4 md:p-6 print:p-4 text-[12px] md:text-[13px] leading-tight min-w-[600px] md:min-w-0">
 
         {/* Heading */}
         {/* <div className="text-center pb-2 mb-2">
@@ -233,7 +254,7 @@ function InvoiceDetail() {
         </div>
 
         {/* Items */}
-        <table className="mt-2 w-full border border-gray-400 border-collapse h-[400px] text-[12px]">
+        <table className="mt-2 w-full border border-gray-400 border-collapse text-[12px]">
 
           {/* HEADER */}
           <thead>
@@ -265,13 +286,6 @@ function InvoiceDetail() {
                 <td className="border-r border-gray-400 p-2 text-right">₹{it.taxable}</td>
               </tr>
             ))}
-
-            {/* EMPTY SPACE */}
-            <tr className="h-[120px]">
-              {Array(7).fill("").map((_, i) => (
-                <td key={i} className="border-r border-gray-400"></td>
-              ))}
-            </tr>
 
             {/* TOTAL */}
             <tr>
@@ -339,7 +353,7 @@ function InvoiceDetail() {
 
 
         {/* Taxable value in words */}
-        <div className="grid grid-cols-2 border-x-1 border-b border-black  p-3">
+        <div className="print-no-break grid grid-cols-2 border-x-1 border-b border-black p-3">
           <div>
             <b>Total Amount (in words):</b>
             <p className="mt-1 font-semibold">
@@ -356,7 +370,7 @@ function InvoiceDetail() {
 
         </div>
         {/* Footer */}
-        <div className="grid grid-cols-2 border-x-1 border-black  border-b-1 ">
+        <div className="print-no-break grid grid-cols-2 border-x-1 border-black border-b-1">
           <div className="border-r border-black  p-3">
             <h3 className="font-bold mb-2">Declaration</h3>
             <p className="text-xs">
@@ -390,6 +404,7 @@ function InvoiceDetail() {
         <div className="text-center mt-3 text-xs">
           This is a Computer Generated Invoice
         </div> */}
+      </div>
       </div>
 
     </div>

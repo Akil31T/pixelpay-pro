@@ -26,23 +26,30 @@ function Products() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<any>(empty);
   const [editId, setEditId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const load = () => supabase.from("products").select("*").order("name").then(({ data }) => setList(data || []));
   useEffect(() => { load(); }, []);
 
   const save = async () => {
     if (!form.name) return toast.error("Name required");
-    const payload = { ...form, unit_price: Number(form.unit_price), stock: Number(form.stock) };
-    if (editId) {
-      const { error } = await supabase.from("products").update(payload).eq("id", editId);
-      if (error) return toast.error(error.message);
-      toast.success("Product updated");
-    } else {
-      const { error } = await supabase.from("products").insert({ ...payload, user_id: user!.id });
-      if (error) return toast.error(error.message);
-      toast.success("Product added");
+    if (saving) return;
+    setSaving(true);
+    try {
+      const payload = { ...form, unit_price: Number(form.unit_price), stock: Number(form.stock) };
+      if (editId) {
+        const { error } = await supabase.from("products").update(payload).eq("id", editId);
+        if (error) { toast.error(error.message); return; }
+        toast.success("Product updated");
+      } else {
+        const { error } = await supabase.from("products").insert({ ...payload, user_id: user!.id });
+        if (error) { toast.error(error.message); return; }
+        toast.success("Product added");
+      }
+      setOpen(false); setForm(empty); setEditId(null); load();
+    } finally {
+      setSaving(false);
     }
-    setOpen(false); setForm(empty); setEditId(null); load();
   };
 
   const del = async (id: string) => {
@@ -75,7 +82,7 @@ function Products() {
                   </Select>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 mt-2"><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={save} className="bg-primary hover:bg-primary-glow">Save</Button></div>
+              <div className="flex justify-end gap-2 mt-2"><Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>Cancel</Button><Button onClick={save} disabled={saving} className="bg-primary hover:bg-primary-glow">{saving ? "Saving…" : "Save"}</Button></div>
             </DialogContent>
           </Dialog>
         }
@@ -89,37 +96,61 @@ function Products() {
             <p className="text-sm text-muted-foreground">Add products to speed up invoice creation.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="text-left px-5 py-3 font-medium">Name</th>
-                  <th className="text-left px-5 py-3 font-medium">SKU</th>
-                  <th className="text-left px-5 py-3 font-medium">HSN</th>
-                  <th className="text-right px-5 py-3 font-medium">Price</th>
-                  {/* <th className="text-right px-5 py-3 font-medium">GST</th> */}
-                  <th className="text-right px-5 py-3 font-medium">Stock</th>
-                  <th className="text-right px-5 py-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {list.map((p) => (
-                  <tr key={p.id} className="border-t border-border hover:bg-muted/30">
-                    <td className="px-5 py-3.5 font-medium">{p.name}</td>
-                    <td className="px-5 py-3.5 text-muted-foreground font-mono text-xs">{p.sku || "—"}</td>
-                    <td className="px-5 py-3.5 text-muted-foreground font-mono text-xs">{p.hsn_code || "—"}</td>
-                    <td className="px-5 py-3.5 text-right font-semibold">{inr(Number(p.unit_price))}</td>
-                    {/* <td className="px-5 py-3.5 text-rigund">{Number(p.gst_rate)}%</td> */}
-                    <td className="px-5 py-3.5 text-right text-muted-foreground">{Number(p.stock)} {p.unit}</td>
-                    <td className="px-5 py-3.5 text-right">
-                      <Button size="icon" variant="ghost" onClick={() => { setForm({ ...empty, ...p }); setEditId(p.id); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="ghost" onClick={() => del(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                    </td>
+          <>
+            {/* Mobile card view */}
+            <div className="md:hidden divide-y divide-border overflow-y-auto max-h-[calc(100dvh-260px)]">
+              {list.map((p) => (
+                <div key={p.id} className="p-4 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm truncate mb-0.5">{p.name}</div>
+                    <div className="text-xs text-muted-foreground space-x-2">
+                      {p.sku && <span>SKU: {p.sku}</span>}
+                      {p.hsn_code && <span>HSN: {p.hsn_code}</span>}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="font-semibold text-sm text-primary">{inr(Number(p.unit_price))}</span>
+                      <span className="text-xs text-muted-foreground">{Number(p.stock)} {p.unit} in stock</span>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 gap-0.5">
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setForm({ ...empty, ...p }); setEditId(p.id); setOpen(true); }}><Pencil className="h-3.5 w-3.5" /></Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => del(p.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table view */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm [table-layout:fixed]">
+                <thead className="[display:table] w-full [table-layout:fixed] bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="text-left px-5 py-3 font-medium w-[30%]">Name</th>
+                    <th className="text-left px-5 py-3 font-medium w-[15%]">SKU</th>
+                    <th className="text-left px-5 py-3 font-medium w-[15%]">HSN</th>
+                    <th className="text-right px-5 py-3 font-medium w-[15%]">Price</th>
+                    <th className="text-right px-5 py-3 font-medium w-[15%]">Stock</th>
+                    <th className="text-right px-5 py-3 font-medium w-[10%]">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="block overflow-y-auto max-h-[calc(100dvh-260px)]">
+                  {list.map((p) => (
+                    <tr key={p.id} className="[display:table] w-full [table-layout:fixed] border-t border-border hover:bg-muted/30">
+                      <td className="px-5 py-3.5 font-medium w-[30%] truncate">{p.name}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground font-mono text-xs w-[15%] truncate">{p.sku || "—"}</td>
+                      <td className="px-5 py-3.5 text-muted-foreground font-mono text-xs w-[15%] truncate">{p.hsn_code || "—"}</td>
+                      <td className="px-5 py-3.5 text-right font-semibold w-[15%]">{inr(Number(p.unit_price))}</td>
+                      <td className="px-5 py-3.5 text-right text-muted-foreground w-[15%]">{Number(p.stock)} {p.unit}</td>
+                      <td className="px-5 py-3.5 text-right w-[10%]">
+                        <Button size="icon" variant="ghost" onClick={() => { setForm({ ...empty, ...p }); setEditId(p.id); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => del(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

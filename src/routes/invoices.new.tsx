@@ -60,8 +60,6 @@ function NewInvoice() {
       const lastNum = last.data?.[0]?.invoice_number || "";
       const m = lastNum.match(/(\d+)$/);
       const next = m ? String(Number(m[1]) + 1) : "1";
-      const yr = new Date().getFullYear();
-      // setInvoiceNumber(`INV-${yr}-${next}`);
       setInvoiceNumber(`Invoice-${next}`);
 
     });
@@ -273,7 +271,7 @@ function NewInvoice() {
                 >
                   <div className="grid md:grid-cols-12 gap-3">
                     {/* Product */}
-                    <div className="md:col-span-4 space-y-1.5">
+                    <div className="md:col-span-3 space-y-1.5">
                       <Label className="text-xs">Product / Service</Label>
 
                       <Select onValueChange={(v) => pickProduct(i, v)}>
@@ -326,7 +324,7 @@ function NewInvoice() {
                     </div>
 
                     {/* Discount */}
-                    <div className="md:col-span-1 space-y-1.5">
+                    <div className="md:col-span-2 space-y-1.5">
                       <Label className="text-xs">Disc %</Label>
                       <Input
                         type="number"
@@ -379,7 +377,7 @@ function NewInvoice() {
 
         {/* Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-card border border-border rounded-xl p-6 shadow-card sticky top-6">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-card md:sticky md:top-6">
             <h3 className="font-display text-lg font-semibold mb-4">Summary</h3>
             <div className="space-y-2.5 text-sm">
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{inr(calc.subtotal)}</span></div>
