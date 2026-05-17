@@ -9,13 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { inr, formatDate, numberToWordsINR, formatPercent } from "@/lib/format";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/invoices/id")({
+export const Route = createFileRoute("/invoices/$id")({
   component: () => <ProtectedRoute><InvoiceDetail /></ProtectedRoute>,
 });
 
 function InvoiceDetail() {
-  // const { id } = Route.useParams();
-  let id: any
+  const { id } = Route.useParams();
   const navigate = useNavigate();
   const [inv, setInv] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
