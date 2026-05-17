@@ -19,7 +19,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InvoicesIndexRouteImport } from './routes/invoices.index'
 import { Route as InvoicesNewRouteImport } from './routes/invoices.new'
-import { Route as InvoicesIdRouteImport } from './routes/invoices.$id'
+import { Route as InvoicesIdRouteImport } from './routes/invoices.id'
 
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
@@ -72,8 +72,8 @@ const InvoicesNewRoute = InvoicesNewRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvoicesIdRoute = InvoicesIdRouteImport.update({
-  id: '/invoices/$id',
-  path: '/invoices/$id',
+  id: '/invoices/id',
+  path: '/invoices/id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -86,7 +86,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
-  '/invoices/$id': typeof InvoicesIdRoute
+  '/invoices/id': typeof InvoicesIdRoute
   '/invoices/new': typeof InvoicesNewRoute
   '/invoices/': typeof InvoicesIndexRoute
 }
@@ -99,7 +99,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
-  '/invoices/$id': typeof InvoicesIdRoute
+  '/invoices/id': typeof InvoicesIdRoute
   '/invoices/new': typeof InvoicesNewRoute
   '/invoices': typeof InvoicesIndexRoute
 }
@@ -113,7 +113,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
-  '/invoices/$id': typeof InvoicesIdRoute
+  '/invoices/id': typeof InvoicesIdRoute
   '/invoices/new': typeof InvoicesNewRoute
   '/invoices/': typeof InvoicesIndexRoute
 }
@@ -128,7 +128,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/settings'
     | '/users'
-    | '/invoices/$id'
+    | '/invoices/id'
     | '/invoices/new'
     | '/invoices/'
   fileRoutesByTo: FileRoutesByTo
@@ -141,7 +141,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/settings'
     | '/users'
-    | '/invoices/$id'
+    | '/invoices/id'
     | '/invoices/new'
     | '/invoices'
   id:
@@ -154,7 +154,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/settings'
     | '/users'
-    | '/invoices/$id'
+    | '/invoices/id'
     | '/invoices/new'
     | '/invoices/'
   fileRoutesById: FileRoutesById
@@ -245,10 +245,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvoicesNewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/invoices/$id': {
-      id: '/invoices/$id'
-      path: '/invoices/$id'
-      fullPath: '/invoices/$id'
+    '/invoices/id': {
+      id: '/invoices/id'
+      path: '/invoices/id'
+      fullPath: '/invoices/id'
       preLoaderRoute: typeof InvoicesIdRouteImport
       parentRoute: typeof rootRouteImport
     }

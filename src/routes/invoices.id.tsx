@@ -9,12 +9,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { inr, formatDate, numberToWordsINR, formatPercent } from "@/lib/format";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/invoices/$id")({
+export const Route = createFileRoute("/invoices/id")({
   component: () => <ProtectedRoute><InvoiceDetail /></ProtectedRoute>,
 });
 
 function InvoiceDetail() {
-  const { id } = Route.useParams();
+  // const { id } = Route.useParams();
+  let id: any
   const navigate = useNavigate();
   const [inv, setInv] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
@@ -176,22 +177,10 @@ function InvoiceDetail() {
             </div>
 
             {/* Row 2 (FIX HERE) */}
-            <div className="grid grid-cols-2 border-black border-b items-stretch">
+            <div className="grid grid-cols-2 border-black items-stretch">
               <div className="p-2 border-black border-r capitalize flex flex-col justify-between">
                 <b>Status</b>
                 <p>{inv.status}</p>
-              </div>
-
-              <div className="p-2 flex flex-col justify-between">
-                <b>Delivery Note</b>
-                {/* <p>{inv.is_interstate ? "IGST" : "CGST + SGST"}</p> */}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 border-black items-stretch">
-              <div className="p-2 border-black border-r flex flex-col justify-between">
-                <b>Due Date</b>
-                {/* <p className="p-2">{inv.due_date}</p> */}
               </div>
 
               <div className="p-2 flex flex-col justify-between">
@@ -199,6 +188,8 @@ function InvoiceDetail() {
                 <p>{inv.vehicle_no}</p>
               </div>
             </div>
+
+
           </div>
         </div>
 
